@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sparkles, Stars } from "lucide-react";
-import heroBg from "@/assets/hero-bg.jpg";
+import heroBg from "@/hero-bg.jpg";
 import { useState, useEffect } from "react";
 
 const nicknames = ["Reina", "Saumya", "Senorita", "Honey", "Jaan"];
