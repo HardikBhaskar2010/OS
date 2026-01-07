@@ -11,6 +11,7 @@ import Letters from "./pages/Letters";
 import Gallery from "./pages/Gallery";
 import Questions from "./pages/Questions";
 import Mood from "./pages/Mood";
+import MoodEnhanced from "./pages/MoodEnhanced";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -62,7 +63,7 @@ const App = () => (
               path="/mood"
               element={
                 <ProtectedRoute>
-                  <Mood />
+                  <MoodEnhanced />
                 </ProtectedRoute>
               }
             />

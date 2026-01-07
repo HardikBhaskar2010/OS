@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Send, Heart, ArrowLeft, Feather, Sparkles, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,56 +8,113 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Link } from "react-router-dom";
 import FloatingHearts from "@/components/FloatingHearts";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 
 interface LoveLetter {
   id: string;
   title: string;
   content: string;
-  from: string;
-  date: Date;
+  from_user_id: string;
+  to_user_id: string;
+  created_at: string;
+  from_name?: string;
 }
 
 const Letters = () => {
-  const [letters, setLetters] = useState<LoveLetter[]>([
-    {
-      id: "1",
-      title: "My First Letter to You",
-      content: "Every moment with you feels like a beautiful dream I never want to wake up from. You are my sunshine, my everything. The way you smile lights up my entire world, and I am so grateful to have you in my life. 💕",
-      from: "Your Love",
-      date: new Date(2024, 0, 14),
-    },
-    {
-      id: "2",
-      title: "To My Soulmate",
-      content: "I fall in love with you more each day. Thank you for being my best friend, my partner, and my forever person. You make every ordinary day feel extraordinary. ✨",
-      from: "Forever Yours",
-      date: new Date(2024, 2, 20),
-    },
-    {
-      id: "3",
-      title: "Missing You",
-      content: "Distance means nothing when someone means everything. I'm counting every second until I can hold you again. You're always in my heart. 🌙",
-      from: "Always Thinking of You",
-      date: new Date(2024, 4, 5),
-    },
-  ]);
-
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [letters, setLetters] = useState<LoveLetter[]>([]);
   const [isWriting, setIsWriting] = useState(false);
   const [selectedLetter, setSelectedLetter] = useState<LoveLetter | null>(null);
-  const [newLetter, setNewLetter] = useState({ title: "", content: "", from: "" });
+  const [newLetter, setNewLetter] = useState({ title: "", content: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (newLetter.title && newLetter.content && newLetter.from) {
-      setLetters([
+  useEffect(() => {
+    if (user) {
+      loadLetters();
+      subscribeToLetters();
+    }
+  }, [user]);
+
+  const loadLetters = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('letters')
+      .select(`
+        *,
+        from_user:users!letters_from_user_id_fkey(display_name),
+        to_user:users!letters_to_user_id_fkey(display_name)
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error loading letters:', error);
+      return;
+    }
+
+    const formattedLetters = (data || []).map((letter: any) => ({
+      ...letter,
+      from_name: letter.from_user?.display_name
+    }));
+
+    setLetters(formattedLetters);
+  };
+
+  const subscribeToLetters = () => {
+    const channel = supabase
+      .channel('letters-changes')
+      .on(
+        'postgres_changes',
         {
-          id: Date.now().toString(),
-          ...newLetter,
-          date: new Date(),
+          event: '*',
+          schema: 'public',
+          table: 'letters'
         },
-        ...letters,
-      ]);
-      setNewLetter({ title: "", content: "", from: "" });
+        () => {
+          loadLetters();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
+  const handleSubmit = async () => {
+    if (!newLetter.title || !newLetter.content || !user || !user.partner_id) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.from('letters').insert({
+        title: newLetter.title,
+        content: newLetter.content,
+        from_user_id: user.id,
+        to_user_id: user.partner_id,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Letter sent! 💕",
+        description: "Your love letter has been delivered",
+      });
+
+      setNewLetter({ title: "", content: "" });
       setIsWriting(false);
+      loadLetters();
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -94,6 +151,7 @@ const Letters = () => {
                 variant={isWriting ? "secondary" : "default"}
                 onClick={() => setIsWriting(!isWriting)}
                 className="gap-2"
+                data-testid="write-letter-button"
               >
                 {isWriting ? <X className="w-4 h-4" /> : <Feather className="w-4 h-4" />}
                 {isWriting ? "Cancel" : "Write a Letter"}
@@ -118,27 +176,33 @@ const Letters = () => {
                       value={newLetter.title}
                       onChange={(e) => setNewLetter({ ...newLetter, title: e.target.value })}
                       className="text-lg py-6 border-primary/20 focus:border-primary bg-card/50"
+                      data-testid="letter-title-input"
                     />
                     <Textarea
                       placeholder="Pour your heart out here..."
                       value={newLetter.content}
                       onChange={(e) => setNewLetter({ ...newLetter, content: e.target.value })}
                       className="min-h-[300px] text-lg border-primary/20 focus:border-primary bg-card/50 resize-none leading-relaxed"
-                    />
-                    <Input
-                      placeholder="Signed with love by..."
-                      value={newLetter.from}
-                      onChange={(e) => setNewLetter({ ...newLetter, from: e.target.value })}
-                      className="border-primary/20 focus:border-primary bg-card/50"
+                      data-testid="letter-content-input"
                     />
                     <Button 
                       onClick={handleSubmit} 
                       className="w-full py-8 text-lg gap-3 shadow-lg"
-                      disabled={!newLetter.title || !newLetter.content || !newLetter.from}
+                      disabled={!newLetter.title || !newLetter.content || isSubmitting}
+                      data-testid="send-letter-button"
                     >
-                      <Send className="w-5 h-5" />
-                      Send Letter
-                      <Heart className="w-5 h-5 fill-current animate-pulse-heart" />
+                      {isSubmitting ? (
+                        <>
+                          <Sparkles className="w-5 h-5 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-5 h-5" />
+                          Send Letter
+                          <Heart className="w-5 h-5 fill-current animate-pulse-heart" />
+                        </>
+                      )}
                     </Button>
                   </motion.div>
                 ) : (
@@ -164,8 +228,8 @@ const Letters = () => {
                               {letter.content}
                             </p>
                             <div className="flex justify-between items-center text-sm pt-4 border-t border-primary/5">
-                              <span className="text-primary font-semibold">— {letter.from}</span>
-                              <span className="text-muted-foreground">{format(letter.date, "MMM d, yyyy")}</span>
+                              <span className="text-primary font-semibold">— {letter.from_name}</span>
+                              <span className="text-muted-foreground">{format(new Date(letter.created_at), "MMM d, yyyy")}</span>
                             </div>
                           </CardContent>
                         </Card>
@@ -211,7 +275,7 @@ const Letters = () => {
                 </div>
                 <h2 className="text-3xl font-bold text-foreground mb-2">{selectedLetter.title}</h2>
                 <p className="text-muted-foreground">
-                  {format(selectedLetter.date, "MMMM d, yyyy")}
+                  {format(new Date(selectedLetter.created_at), "MMMM d, yyyy")}
                 </p>
               </div>
               
@@ -224,7 +288,7 @@ const Letters = () => {
               <div className="flex items-center justify-center gap-4">
                 <div className="h-px bg-primary/20 flex-1" />
                 <p className="text-2xl font-bold text-primary flex items-center gap-3 italic">
-                  — {selectedLetter.from}
+                  — {selectedLetter.from_name}
                   <Heart className="w-6 h-6 fill-current animate-pulse-heart" />
                 </p>
                 <div className="h-px bg-primary/20 flex-1" />
