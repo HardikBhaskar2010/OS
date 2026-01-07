@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useCouple } from "@/contexts/CoupleContext";
 import FloatingHearts from "@/components/FloatingHearts";
 import HeroSection from "@/components/HeroSection";
 import DaysCounter from "@/components/DaysCounter";
@@ -6,17 +7,18 @@ import LoveLetters from "@/components/LoveLetters";
 import PhotoGallery from "@/components/PhotoGallery";
 import MoodSharing from "@/components/MoodSharing";
 import DailyQuestion from "@/components/DailyQuestion";
-import { Heart, Sparkles, LogOut } from "lucide-react";
+import { Heart, Sparkles, LogOut, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { user, logout } = useAuth();
-  // Customize these values for your relationship!
-  const anniversaryDate = new Date(2024, 4, 14); // May 14th (month is 0-indexed, so 4 = May)
-  const relationshipStart = new Date(2024, 1, 14); // February 14, 2024
-  const partnerNames: [string, string] = ["Hardik", "Saumya"];
+  const { anniversaryDate, relationshipStart, partnerNames, myName, partnerName } = useCouple();
+  
+  // Fallback dates if not set in profile
+  const displayAnniversary = anniversaryDate || new Date(2024, 4, 14); // May 14th
+  const displayRelationshipStart = relationshipStart || new Date(2024, 1, 14); // Feb 14th
 
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
@@ -34,9 +36,9 @@ const Index = () => {
             transition={{ duration: 0.5 }}
           >
             <DaysCounter 
-              anniversaryDate={anniversaryDate} 
+              anniversaryDate={displayAnniversary} 
               partnerNames={partnerNames}
-              relationshipStart={relationshipStart}
+              relationshipStart={displayRelationshipStart}
             />
           </motion.div>
 
@@ -50,14 +52,16 @@ const Index = () => {
             {user?.role === 'boyfriend' ? (
               <div className="p-8 bg-gradient-to-br from-blue-500/10 via-primary/20 to-primary/5 rounded-3xl border border-primary/20 shadow-lg relative group overflow-hidden">
                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors" />
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                  onClick={logout}
-                >
-                  <LogOut className="w-4 h-4 text-primary" />
-                </Button>
+                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                  <Link to="/settings">
+                    <Button variant="ghost" size="icon">
+                      <Settings className="w-4 h-4 text-primary" />
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="icon" onClick={logout}>
+                    <LogOut className="w-4 h-4 text-primary" />
+                  </Button>
+                </div>
                 
                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 text-left">
                   <div className="p-4 bg-primary/20 rounded-2xl">
@@ -65,7 +69,7 @@ const Index = () => {
                   </div>
                   <div className="flex-1 space-y-2">
                     <h2 className="text-3xl font-bold text-primary">King's Command Center 👑</h2>
-                    <p className="text-muted-foreground text-lg">Welcome back, Hardik. Saumya's heart is waiting for your touch today.</p>
+                    <p className="text-muted-foreground text-lg">Welcome back, {myName}. {partnerName}'s heart is waiting for your touch today.</p>
                     <div className="flex gap-4 pt-2">
                       <div className="px-3 py-1 bg-primary/10 rounded-full text-xs font-semibold text-primary border border-primary/20">
                         Status: Guardian
@@ -80,14 +84,16 @@ const Index = () => {
             ) : (
               <div className="p-8 bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-background rounded-3xl border border-pink-500/20 shadow-lg relative group overflow-hidden">
                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl group-hover:bg-pink-500/20 transition-colors" />
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20"
-                  onClick={logout}
-                >
-                  <LogOut className="w-4 h-4 text-pink-500" />
-                </Button>
+                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                  <Link to="/settings">
+                    <Button variant="ghost" size="icon">
+                      <Settings className="w-4 h-4 text-pink-500" />
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="icon" onClick={logout}>
+                    <LogOut className="w-4 h-4 text-pink-500" />
+                  </Button>
+                </div>
 
                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 text-left">
                   <div className="p-4 bg-pink-500/20 rounded-2xl">
@@ -95,8 +101,8 @@ const Index = () => {
                   </div>
                   <div className="flex-1 space-y-2">
                     <h2 className="text-3xl font-bold text-pink-500">Princess's Sanctuary 🌸</h2>
-                    <h3 className="text-xl font-medium text-pink-400">Hello, Beautiful Saumya.</h3>
-                    <p className="text-muted-foreground">Hardik's world revolves around you. Explore the love he's left for you here.</p>
+                    <h3 className="text-xl font-medium text-pink-400">Hello, Beautiful {myName}.</h3>
+                    <p className="text-muted-foreground">{partnerName}'s world revolves around you. Explore the love he's left for you here.</p>
                     <div className="flex gap-4 pt-2">
                       <div className="px-3 py-1 bg-pink-500/10 rounded-full text-xs font-semibold text-pink-500 border border-pink-500/20">
                         Mood: Adored

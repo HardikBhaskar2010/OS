@@ -2,18 +2,21 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sparkles, Stars } from "lucide-react";
 import heroBg from "@/hero-bg.jpg";
 import { useState, useEffect } from "react";
-
-const nicknames = ["Reina", "Saumya", "Senorita", "Honey", "Jaan"];
+import { useCouple } from "@/contexts/CoupleContext";
 
 const HeroSection = () => {
+  const { partnerNames } = useCouple();
   const [index, setIndex] = useState(0);
+  
+  // Create dynamic nicknames from partner names
+  const nicknames = [partnerNames[0], partnerNames[1], "Us", "Forever"];
 
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % nicknames.length);
     }, 3000);
     return () => clearInterval(timer);
-  }, []);
+  }, [nicknames.length]);
 
   return (
     <div className="relative h-[55vh] min-h-[450px] overflow-hidden">
