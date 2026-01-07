@@ -6,12 +6,13 @@ import LoveLetters from "@/components/LoveLetters";
 import PhotoGallery from "@/components/PhotoGallery";
 import MoodSharing from "@/components/MoodSharing";
 import DailyQuestion from "@/components/DailyQuestion";
-import { Heart, Sparkles } from "lucide-react";
+import { Heart, Sparkles, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   // Customize these values for your relationship!
   const anniversaryDate = new Date(2024, 4, 14); // May 14th (month is 0-indexed, so 4 = May)
   const relationshipStart = new Date(2024, 1, 14); // February 14, 2024
@@ -47,12 +48,28 @@ const Index = () => {
             transition={{ delay: 0.2 }}
           >
             {user?.role === 'boyfriend' ? (
-              <div className="p-8 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl border border-primary/20 shadow-lg text-center">
+              <div className="p-8 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl border border-primary/20 shadow-lg text-center relative group">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={logout}
+                >
+                  <LogOut className="w-4 h-4 text-primary" />
+                </Button>
                 <h2 className="text-2xl font-bold text-primary mb-2">Welcome Back, Hardik! 💕</h2>
                 <p className="text-muted-foreground">Ready to make Saumya's day special today?</p>
               </div>
             ) : (
-              <div className="p-8 bg-gradient-to-br from-pink-500/20 to-pink-500/5 rounded-3xl border border-pink-500/20 shadow-lg text-center">
+              <div className="p-8 bg-gradient-to-br from-pink-500/20 to-pink-500/5 rounded-3xl border border-pink-500/20 shadow-lg text-center relative group">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={logout}
+                >
+                  <LogOut className="w-4 h-4 text-pink-500" />
+                </Button>
                 <h2 className="text-2xl font-bold text-pink-500 mb-2">Welcome Back, Saumya! 🌸</h2>
                 <p className="text-muted-foreground">See what Hardik has shared with you today.</p>
               </div>
