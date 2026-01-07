@@ -100,11 +100,8 @@ const Login = () => {
             </form>
 
             <div className="mt-6 text-center text-sm">
-              <p className="text-muted-foreground">
-                Don't have an account?{" "}
-                <Link to="/register" className="text-primary hover:underline font-medium">
-                  Register here
-                </Link>
+              <p className="text-muted-foreground italic">
+                A personal space for us. 💕
               </p>
             </div>
           </CardContent>
