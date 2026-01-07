@@ -48,30 +48,65 @@ const Index = () => {
             transition={{ delay: 0.2 }}
           >
             {user?.role === 'boyfriend' ? (
-              <div className="p-8 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl border border-primary/20 shadow-lg text-center relative group">
+              <div className="p-8 bg-gradient-to-br from-blue-500/10 via-primary/20 to-primary/5 rounded-3xl border border-primary/20 shadow-lg relative group overflow-hidden">
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-colors" />
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20"
                   onClick={logout}
                 >
                   <LogOut className="w-4 h-4 text-primary" />
                 </Button>
-                <h2 className="text-2xl font-bold text-primary mb-2">Welcome Back, Hardik! 💕</h2>
-                <p className="text-muted-foreground">Ready to make Saumya's day special today?</p>
+                
+                <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 text-left">
+                  <div className="p-4 bg-primary/20 rounded-2xl">
+                    <Heart className="w-12 h-12 text-primary fill-current" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <h2 className="text-3xl font-bold text-primary">King's Command Center 👑</h2>
+                    <p className="text-muted-foreground text-lg">Welcome back, Hardik. Saumya's heart is waiting for your touch today.</p>
+                    <div className="flex gap-4 pt-2">
+                      <div className="px-3 py-1 bg-primary/10 rounded-full text-xs font-semibold text-primary border border-primary/20">
+                        Status: Guardian
+                      </div>
+                      <div className="px-3 py-1 bg-primary/10 rounded-full text-xs font-semibold text-primary border border-primary/20">
+                        Mission: Make her smile
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className="p-8 bg-gradient-to-br from-pink-500/20 to-pink-500/5 rounded-3xl border border-pink-500/20 shadow-lg text-center relative group">
+              <div className="p-8 bg-gradient-to-br from-pink-500/20 via-rose-500/10 to-background rounded-3xl border border-pink-500/20 shadow-lg relative group overflow-hidden">
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-pink-500/10 rounded-full blur-3xl group-hover:bg-pink-500/20 transition-colors" />
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity z-20"
                   onClick={logout}
                 >
                   <LogOut className="w-4 h-4 text-pink-500" />
                 </Button>
-                <h2 className="text-2xl font-bold text-pink-500 mb-2">Welcome Back, Saumya! 🌸</h2>
-                <p className="text-muted-foreground">See what Hardik has shared with you today.</p>
+
+                <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 text-left">
+                  <div className="p-4 bg-pink-500/20 rounded-2xl">
+                    <Sparkles className="w-12 h-12 text-pink-500" />
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <h2 className="text-3xl font-bold text-pink-500">Princess's Sanctuary 🌸</h2>
+                    <h3 className="text-xl font-medium text-pink-400">Hello, Beautiful Saumya.</h3>
+                    <p className="text-muted-foreground">Hardik's world revolves around you. Explore the love he's left for you here.</p>
+                    <div className="flex gap-4 pt-2">
+                      <div className="px-3 py-1 bg-pink-500/10 rounded-full text-xs font-semibold text-pink-500 border border-pink-500/20">
+                        Mood: Adored
+                      </div>
+                      <div className="px-3 py-1 bg-pink-500/10 rounded-full text-xs font-semibold text-pink-500 border border-pink-500/20">
+                        Daily Dose of Love: Ready
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </motion.div>
