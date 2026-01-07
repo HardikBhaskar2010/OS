@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Smile, Heart, Sun, Moon, Sparkles, Coffee, Cloud, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const moods = [
   { emoji: "😍", label: "In Love", color: "from-pink-500/20 to-rose-500/20", borderColor: "border-pink-400" },
@@ -14,12 +15,36 @@ const moods = [
 ];
 
 const MoodSharing = () => {
-  const [selectedMood, setSelectedMood] = useState<number | null>(2);
-  const [partnerMood] = useState(0);
+  const { user } = useAuth();
+  const storageKey = `mood_${user?.id || 'default'}`;
+  const partnerStorageKey = `mood_${user?.id === '1' ? '2' : '1'}`;
+  
+  const [selectedMood, setSelectedMood] = useState<number | null>(() => {
+    const saved = localStorage.getItem(storageKey);
+    return saved !== null ? parseInt(saved) : 2;
+  });
+  
+  const [partnerMood, setPartnerMood] = useState(() => {
+    const saved = localStorage.getItem(partnerStorageKey);
+    return saved !== null ? parseInt(saved) : 0;
+  });
+  
   const [justUpdated, setJustUpdated] = useState(false);
+
+  // Poll for partner mood changes locally (since it's a personal app)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const saved = localStorage.getItem(partnerStorageKey);
+      if (saved !== null) {
+        setPartnerMood(parseInt(saved));
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [partnerStorageKey]);
 
   const handleMoodSelect = (index: number) => {
     setSelectedMood(index);
+    localStorage.setItem(storageKey, index.toString());
     setJustUpdated(true);
     setTimeout(() => setJustUpdated(false), 2000);
   };
